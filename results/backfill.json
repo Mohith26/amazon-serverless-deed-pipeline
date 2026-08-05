@@ -1,0 +1,15 @@
+{
+  "backfill_seconds": 472.86,
+  "counties": [
+    "HARRIS",
+    "DALLAS"
+  ],
+  "days": 30,
+  "first_day": "2026-07-06",
+  "last_day": "2026-08-04",
+  "records_per_day_per_county": 500,
+  "records_per_day_total": 1000,
+  "records_per_second": 63.4,
+  "total_staged": 30000,
+  "total_written": 30000
+}

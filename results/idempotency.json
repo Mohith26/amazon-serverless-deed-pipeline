@@ -1,0 +1,9 @@
+{
+  "ddb_after": 30000,
+  "ddb_before": 30000,
+  "duplicates_detected": 1000,
+  "item_count_unchanged": true,
+  "new_writes_on_replay": 0,
+  "replay_day": "2026-07-06",
+  "replayed_records": 1000
+}

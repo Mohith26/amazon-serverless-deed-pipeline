@@ -1,0 +1,9 @@
+{
+  "cost_per_month_usd": null,
+  "how_to_measure_on_real_aws": [
+    "sam deploy --tags Project=deedstream",
+    "aws ce get-cost-and-usage --time-period Start=<m-start>,End=<m-end> --granularity MONTHLY --metrics UnblendedCost --filter '{\"Tags\":{\"Key\":\"Project\",\"Values\":[\"deedstream\"]}}'"
+  ],
+  "reason": "Measured on LocalStack (emulated AWS), which is free and emits no billing data. A real monthly cost requires deploying to a real AWS account and reading Cost Explorer for tag Project=deedstream.",
+  "status": "UNMEASURED/BLOCKED"
+}

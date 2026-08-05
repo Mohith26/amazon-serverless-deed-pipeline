@@ -1,0 +1,25 @@
+{
+  "all_ok": true,
+  "api_gateway_ok": true,
+  "api_gateway_query": {
+    "count": 40,
+    "url_shape": "/records?county=&date="
+  },
+  "dlq_depth_after_malformed": 1,
+  "dlq_ok": true,
+  "dynamodb_items_after_pipeline": 40,
+  "fetcher_invoke": {
+    "response": {
+      "count_per_county": 40,
+      "counties": [
+        "HARRIS"
+      ],
+      "date": "2026-08-04",
+      "staged": 40
+    },
+    "status": 200
+  },
+  "note": "DLQ redrive verified separately at ~120-140s (3 receives x 60s VisibilityTimeout on the deployed queue); smoke DLQ wait raised to 240s.",
+  "parser_pipeline_ok": true,
+  "target": "SAM stack deployed to LocalStack (emulated AWS)"
+}

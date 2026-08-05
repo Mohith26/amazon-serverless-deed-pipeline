@@ -1,0 +1,7 @@
+{
+  "dynamodb_item_count": 30000,
+  "expected_total": 30000,
+  "reconciled": true,
+  "s3_object_count": 30000,
+  "zero_dropped": true
+}

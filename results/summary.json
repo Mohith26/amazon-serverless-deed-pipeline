@@ -1,0 +1,102 @@
+{
+  "backfill": {
+    "backfill_seconds": 472.86,
+    "counties": [
+      "HARRIS",
+      "DALLAS"
+    ],
+    "days": 30,
+    "first_day": "2026-07-06",
+    "last_day": "2026-08-04",
+    "records_per_day_per_county": 500,
+    "records_per_day_total": 1000,
+    "records_per_second": 63.4,
+    "total_staged": 30000,
+    "total_written": 30000
+  },
+  "cost_per_month_usd": null,
+  "cost_status": "UNMEASURED/BLOCKED - LocalStack is free/local; needs a real AWS deploy",
+  "dlq": {
+    "all_quarantined": true,
+    "dlq_depth": 25,
+    "injected": 25
+  },
+  "generated_at": "2026-08-05",
+  "idempotency": {
+    "ddb_after": 30000,
+    "ddb_before": 30000,
+    "duplicates_detected": 1000,
+    "item_count_unchanged": true,
+    "new_writes_on_replay": 0,
+    "replay_day": "2026-07-06",
+    "replayed_records": 1000
+  },
+  "localstack_health": {
+    "edition": "community",
+    "services": {
+      "acm": "disabled",
+      "apigateway": "available",
+      "cloudformation": "available",
+      "cloudwatch": "running",
+      "config": "disabled",
+      "dynamodb": "running",
+      "dynamodbstreams": "available",
+      "ec2": "disabled",
+      "es": "disabled",
+      "events": "available",
+      "firehose": "disabled",
+      "iam": "available",
+      "kinesis": "available",
+      "kms": "disabled",
+      "lambda": "available",
+      "logs": "available",
+      "opensearch": "disabled",
+      "redshift": "disabled",
+      "resource-groups": "disabled",
+      "resourcegroupstaggingapi": "disabled",
+      "route53": "disabled",
+      "route53resolver": "disabled",
+      "s3": "running",
+      "s3control": "disabled",
+      "scheduler": "disabled",
+      "secretsmanager": "disabled",
+      "ses": "disabled",
+      "sns": "disabled",
+      "sqs": "running",
+      "ssm": "disabled",
+      "stepfunctions": "disabled",
+      "sts": "available",
+      "support": "disabled",
+      "swf": "disabled",
+      "transcribe": "disabled"
+    },
+    "version": "3.8.1"
+  },
+  "parser_latency": {
+    "max_ms": 1270.943,
+    "mean_ms": 11.384,
+    "n": 31000,
+    "p50_ms": 8.921,
+    "p95_ms": 24.245,
+    "p99_ms": 46.951
+  },
+  "query_latency": {
+    "iterations": 500,
+    "max_ms": 161.57,
+    "mean_ms": 24.707,
+    "n": 500,
+    "nonempty_results": 500,
+    "p50_ms": 23.078,
+    "p95_ms": 37.372,
+    "p99_ms": 49.837
+  },
+  "reconciliation": {
+    "dynamodb_item_count": 30000,
+    "expected_total": 30000,
+    "reconciled": true,
+    "s3_object_count": 30000,
+    "zero_dropped": true
+  },
+  "target": "LocalStack (emulated AWS) - community edition",
+  "total_wall_seconds": 505.93
+}

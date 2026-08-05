@@ -1,0 +1,11 @@
+{
+  "description": "GSI grantor/grantee party lookup vs LocalStack DynamoDB",
+  "iterations": 500,
+  "max_ms": 161.57,
+  "mean_ms": 24.707,
+  "n": 500,
+  "nonempty_results": 500,
+  "p50_ms": 23.078,
+  "p95_ms": 37.372,
+  "p99_ms": 49.837
+}
