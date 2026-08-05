@@ -1,0 +1,144 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  DeedStream - serverless county-records pipeline. EventBridge -> Fetcher Lambda
+  -> S3 (bronze) + SQS -> Parser Lambda -> DynamoDB single-table (+ GSIs);
+  API Gateway -> Query Lambda. DLQ on the records queue. One-command deploy.
+  Target: real AWS; measured on LocalStack (see README).
+
+Parameters:
+  RecordsPerDay:
+    Type: Number
+    Default: 500
+    Description: Synthetic records the fetcher stages per county per day.
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Handler: app.lambda_handler
+    Timeout: 30
+    MemorySize: 256
+    Tracing: Active
+    Tags:
+      Project: deedstream
+      Component: pipeline
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref RecordsTable
+        BRONZE_BUCKET: !Ref BronzeBucket
+        QUEUE_NAME: !GetAtt RecordsQueue.QueueName
+        DLQ_NAME: !GetAtt RecordsDLQ.QueueName
+        RECORDS_PER_DAY: !Ref RecordsPerDay
+
+Resources:
+  BronzeBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      Tags:
+        - { Key: Project, Value: deedstream }
+
+  RecordsDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: deedstream-records-dlq
+      MessageRetentionPeriod: 1209600
+      Tags:
+        - { Key: Project, Value: deedstream }
+
+  RecordsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: deedstream-records
+      VisibilityTimeout: 60
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt RecordsDLQ.Arn
+        maxReceiveCount: 3
+      Tags:
+        - { Key: Project, Value: deedstream }
+
+  RecordsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: deedstream-records
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - { AttributeName: PK, AttributeType: S }
+        - { AttributeName: SK, AttributeType: S }
+        - { AttributeName: grantor_key, AttributeType: S }
+        - { AttributeName: grantee_key, AttributeType: S }
+        - { AttributeName: filing_date, AttributeType: S }
+      KeySchema:
+        - { AttributeName: PK, KeyType: HASH }
+        - { AttributeName: SK, KeyType: RANGE }
+      GlobalSecondaryIndexes:
+        - IndexName: grantor-index
+          KeySchema:
+            - { AttributeName: grantor_key, KeyType: HASH }
+            - { AttributeName: filing_date, KeyType: RANGE }
+          Projection: { ProjectionType: ALL }
+        - IndexName: grantee-index
+          KeySchema:
+            - { AttributeName: grantee_key, KeyType: HASH }
+            - { AttributeName: filing_date, KeyType: RANGE }
+          Projection: { ProjectionType: ALL }
+      Tags:
+        - { Key: Project, Value: deedstream }
+
+  FetcherFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: deedstream.fetcher.lambda_handler
+      Policies:
+        - S3CrudPolicy: { BucketName: !Ref BronzeBucket }
+        - SQSSendMessagePolicy: { QueueName: !GetAtt RecordsQueue.QueueName }
+      Events:
+        DailySchedule:
+          Type: Schedule
+          Properties:
+            Schedule: rate(1 day)
+            Description: Pull the previous day's county filings.
+            Enabled: true
+
+  ParserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: deedstream.parser.lambda_handler
+      Policies:
+        - DynamoDBCrudPolicy: { TableName: !Ref RecordsTable }
+      Events:
+        RecordsQueueEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt RecordsQueue.Arn
+            BatchSize: 10
+            FunctionResponseTypes:
+              - ReportBatchItemFailures
+
+  QueryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: deedstream.query.lambda_handler
+      Policies:
+        - DynamoDBReadPolicy: { TableName: !Ref RecordsTable }
+      Events:
+        GetRecords:
+          Type: Api
+          Properties:
+            Path: /records
+            Method: get
+
+Outputs:
+  ApiBaseUrl:
+    Description: Base URL for the query API.
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+  RecordsTableName:
+    Value: !Ref RecordsTable
+  BronzeBucketName:
+    Value: !Ref BronzeBucket
+  RecordsQueueUrl:
+    Value: !Ref RecordsQueue
+  DLQUrl:
+    Value: !Ref RecordsDLQ

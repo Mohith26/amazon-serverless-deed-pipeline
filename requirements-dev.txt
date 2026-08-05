@@ -1,0 +1,7 @@
+-r requirements.txt
+# Testing + LocalStack tooling (all free / local).
+pytest>=8.0
+moto[s3,dynamodb,sqs]>=5.0
+localstack
+awscli-local
+aws-sam-cli-local

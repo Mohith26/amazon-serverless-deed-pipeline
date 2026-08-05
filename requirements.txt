@@ -1,0 +1,3 @@
+# Lambda runtime deps. boto3 is provided by the AWS Lambda Python 3.12 runtime,
+# so the deployment package needs nothing extra. Pinned here for local runs.
+boto3>=1.34
