@@ -1,0 +1,46 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+      - name: Unit tests (moto, no LocalStack)
+        run: pytest -q -m "not integration"
+
+  integration:
+    runs-on: ubuntu-latest
+    services:
+      localstack:
+        image: localstack/localstack:3.8.1
+        ports:
+          - 4566:4566
+        env:
+          SERVICES: s3,sqs,dynamodb,lambda,events,apigateway,cloudformation,logs,iam,sts,cloudwatch
+        options: >-
+          --health-cmd "curl -sf http://localhost:4566/_localstack/health || exit 1"
+          --health-interval 10s --health-timeout 5s --health-retries 15
+    env:
+      AWS_ENDPOINT_URL: http://localhost:4566
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt awscli aws-sam-cli
+      - name: LocalStack integration test (idempotency + reconciliation)
+        run: pytest -q -m integration
+      - name: Deploy SAM stack to LocalStack (staging)
+        run: bash scripts/deploy_local.sh
